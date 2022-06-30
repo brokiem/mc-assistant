@@ -12,8 +12,8 @@ const pvp = require('mineflayer-pvp').plugin
 let mcData
 let hunt
 const bot = mineflayer.createBot({
-    host: 'localhost',
-    port: 25565,
+    host: process.env.address ?? 'localhost',
+    port: process.env.port ?? 25565,
     username: 'broki_bot'
 })
 
