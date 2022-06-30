@@ -26,9 +26,9 @@ let defaultMove
 
 bot.once('spawn', () => {
     mcData = require('minecraft-data')(bot.version)
-
     defaultMove = new Movements(bot, mcData)
-    mineflayerViewer(bot, {firstPerson: true, port: process.env.PORT ?? 443})
+
+    mineflayerViewer(bot, {firstPerson: true, port: process.env.PORT})
 
     const path = [bot.entity.position.clone()]
     bot.on('move', () => {
