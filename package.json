@@ -10,11 +10,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "mineflayer-builder": "brokiem/mineflayer-builder",
     "minecraft-data": "^3.5.0",
     "mineflayer": "^4.3.0",
     "mineflayer-collectblock": "^1.4.1",
     "mineflayer-pathfinder": "^2.2.0",
     "mineflayer-pvp": "^1.2.1",
+    "prismarine-schematic": "^1.2.3",
     "prismarine-viewer": "^1.23.0",
     "vec3": "^0.1.7"
   }

@@ -1,12 +1,16 @@
 const mineflayer = require('mineflayer')
+const {Vec3} = require("vec3");
 
 // extensions
 const mineflayerViewer = require('prismarine-viewer').mineflayer
 const pathfinder = require('mineflayer-pathfinder').pathfinder
+const Movements = require('mineflayer-pathfinder').Movements
+const {GoalNear} = require('mineflayer-pathfinder').goals
 const collectBlock = require('mineflayer-collectblock').plugin
 const pvp = require('mineflayer-pvp').plugin
 
 let mcData
+let hunt
 const bot = mineflayer.createBot({
     host: 'localhost',
     port: 25565,
@@ -18,9 +22,12 @@ bot.loadPlugin(pathfinder)
 bot.loadPlugin(collectBlock)
 bot.loadPlugin(pvp)
 
+let defaultMove
+
 bot.once('spawn', () => {
     mcData = require('minecraft-data')(bot.version)
 
+    defaultMove = new Movements(bot, mcData)
     //mineflayerViewer(bot, { firstPerson: true, port: 3000 })
 
     /* const path = [bot.entity.position.clone()]
@@ -35,6 +42,8 @@ bot.once('spawn', () => {
 })
 
 bot.on('chat', async (username, message) => {
+    if (username === bot.username) return
+
     const args = message.split(' ')
 
     switch (args[0]) {
@@ -48,8 +57,18 @@ bot.on('chat', async (username, message) => {
                 case "e":
                     await attackEntity(args[2])
                     break
+                case "stop":
+                    hunt = null
+                    bot.chat("Stopped hunting")
+                    break
                 default:
-                    bot.chat("Usage: attack <player|entity> <name>")
+                    bot.chat("Usage: attack <player|entity|stop> <name> <hunt>")
+            }
+
+            hunt = null
+
+            if (args[3] === "hunt") {
+                hunt = args[2]
             }
             break
         case "collect":
@@ -90,7 +109,38 @@ bot.on('chat', async (username, message) => {
                 bot.chat(err.message)
             }
             break
+        case "come":
+            if (username !== "brokiemydog") {
+                return
+            }
+
+            let pos
+
+            if (args.length >= 4) {
+                pos = new Vec3(parseFloat(args[1]), parseFloat(args[2]), parseFloat(args[3]))
+            } else {
+                const target = bot.players[username] ? bot.players[username].entity : null
+
+                if (!target) {
+                    bot.chat('I don\'t see you !')
+                    return
+                }
+
+                pos = target.position
+            }
+
+            bot.chat("Otw to " + pos.toString())
+
+            bot.pathfinder.setMovements(defaultMove)
+            bot.pathfinder.setGoal(new GoalNear(pos.x, pos.y, pos.z, 1))
+            break
     }
+})
+
+bot.on("stoppedAttacking", async () => {
+    if (hunt === null) return
+
+    await attackEntity(hunt)
 })
 
 async function attackPlayer(username) {
@@ -125,13 +175,5 @@ async function attackEntity(name) {
     }
 
     bot.chat(`Attacking ${best.name}`)
-    pullSword()
     await bot.pvp.attack(best)
-}
-
-async function pullSword() {
-    const sword = bot.inventory.items().find(item => item.name.includes('sword'))
-    if (sword) {
-        bot.equip(sword, 'hand')
-    }
 }
