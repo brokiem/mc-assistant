@@ -28,15 +28,15 @@ bot.once('spawn', () => {
     mcData = require('minecraft-data')(bot.version)
 
     defaultMove = new Movements(bot, mcData)
-    //mineflayerViewer(bot, { firstPerson: true, port: 3000 })
+    mineflayerViewer(bot, {firstPerson: true, port: 3000})
 
-    /* const path = [bot.entity.position.clone()]
-     bot.on('move', () => {
-         if (path[path.length - 1].distanceTo(bot.entity.position) > 1) {
-             path.push(bot.entity.position.clone())
-             bot.viewer.drawLine('path', path)
-         }
-     })*/
+    const path = [bot.entity.position.clone()]
+    bot.on('move', () => {
+        if (path[path.length - 1].distanceTo(bot.entity.position) > 1) {
+            path.push(bot.entity.position.clone())
+            bot.viewer.drawLine('path', path)
+        }
+    })
 
     console.log("Spawned")
 })
